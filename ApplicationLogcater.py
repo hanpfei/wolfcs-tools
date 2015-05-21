@@ -14,12 +14,15 @@ adb_path = "/media/data/dev_tools/adt-bundle-linux-x86_64-20140624/sdk/platform-
 g_app_pid = ""
 
 def usage():
-    print "Usage: " + sys.argv[0] + " -s device_name -a app_name"
+    print "Usage: " + sys.argv[0] + " [-s device_name] -a app_name"
 
 
 def get_app_pid(device_name, app_name):
     # print "device name = " + device_name + ", app_name = " + app_name
-    command = adb_path + " -s " + str(device_name) + " shell ps | grep " + app_name
+    command = adb_path
+    if len(device_name) > 0:
+        command = command + " -s " + str(device_name)
+    command = command + " shell ps | grep " + app_name
     # print "cmd = " + command
     # (status, output) = commands.getstatusoutput(command)
     # print "status = " + str(status) + " output = " + str(output)
@@ -36,7 +39,11 @@ def get_app_pid(device_name, app_name):
 
 def logcat_app(device_name, app_name):
     logcat_format = " -v threadtime "
-    command = adb_path + " -s " + str(device_name) + " logcat " + logcat_format
+    command = adb_path
+    if len(device_name) > 0:
+        command = command + " -s " + str(device_name)
+    command = command + " logcat " + logcat_format
+
     print "cmd = " + command + " app_id = " + g_app_pid + " " + app_name
     popen = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
     log_pattern = re.compile('(\S+\s+\S+)\s+(\d+)(.+)$')
@@ -57,7 +64,6 @@ def get_app_pid_run(device_name, app_name):
             print "new g_app_id = " + g_app_pid
 
         time.sleep(5)
-
 
 if __name__ == "__main__":
     opts, args = getopt.getopt(sys.argv[1:], "s:a:h")

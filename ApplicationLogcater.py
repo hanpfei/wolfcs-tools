@@ -11,7 +11,7 @@ import time
 
 adb_path = "/media/data/dev_tools/adt-bundle-linux-x86_64-20140624/sdk/platform-tools/adb"
 
-g_app_pid = ""
+g_app_pid = {}
 
 def usage():
     print "Usage: " + sys.argv[0] + " [-s device_name] -a app_name"
@@ -27,24 +27,32 @@ def get_app_pid(device_name, app_name):
     # (status, output) = commands.getstatusoutput(command)
     # print "status = " + str(status) + " output = " + str(output)
     cmd_result = os.popen(command)
-    app_info = cmd_result.readline()
+    app_infos = cmd_result.readlines()
     # print "app_info = " + app_info
 
-    pattern = re.compile('\w+\s+(\d+)\s+\d+\s+\d+\s+\d+\s+\w+\s+\d+\s+\w+\s+.+$')
-    match = pattern.match(app_info.strip())
+    app_pids = {}
     app_pid = ""
-    if match:
-        app_pid = match.group(1)
-    return app_pid
+    pattern = re.compile('\w+\s+(\d+)\s+\d+\s+\d+\s+\d+\s+\w+\s+\d+\s+\w+\s+(.+)$')
+    for app_info in app_infos:
+        match = pattern.match(app_info.strip())
+        if match:
+            app_pid = match.group(1)
+            pkgname = match.group(2)
+            print "app_id = " + str(app_pid) + " pkgname = " + str(pkgname)
+            app_pids[app_pid] = pkgname
+
+    return app_pids
 
 def logcat_app(device_name, app_name):
+    global g_app_pid
+
     logcat_format = " -v threadtime "
     command = adb_path
     if len(device_name) > 0:
         command = command + " -s " + str(device_name)
     command = command + " logcat " + logcat_format
 
-    print "cmd = " + command + " app_id = " + g_app_pid + " " + app_name
+    print "cmd = " + command + ", app_id = " + str(g_app_pid) + " " + app_name
     popen = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True)
     log_pattern = re.compile('(\S+\s+\S+)\s+(\d+)(.+)$')
     while True:
@@ -52,16 +60,16 @@ def logcat_app(device_name, app_name):
         match = log_pattern.match(log)
         if match:
             pid = match.group(2)
-            if (pid == g_app_pid):
-                print str(match.group(1)) + " " + app_name + " " + str(match.group(2)) + str(match.group(3))
+            for apppid in g_app_pid.keys():
+                if (pid == apppid):
+                    print str(match.group(1)) + " " + g_app_pid[apppid] + " " + str(match.group(2)) + str(match.group(3))
 
 def get_app_pid_run(device_name, app_name):
     global g_app_pid
     while True:
-        app_pid = get_app_pid(device_name, app_name)
-        if (g_app_pid != app_pid):
-            g_app_pid = app_pid
-            print "new g_app_id = " + g_app_pid
+        app_pids = get_app_pid(device_name, app_name)
+        g_app_pid = app_pids
+        print "new g_app_id = " + str(g_app_pid)
 
         time.sleep(5)
 

@@ -28,11 +28,11 @@ def get_app_pid(device_name, app_name):
     # print "status = " + str(status) + " output = " + str(output)
     cmd_result = os.popen(command)
     app_infos = cmd_result.readlines()
-    # print "app_info = " + app_info
+    # print "app_infos = " + str(app_infos)
 
     app_pids = {}
     app_pid = ""
-    pattern = re.compile('\w+\s+(\d+)\s+\d+\s+\d+\s+\d+\s+\w+\s+\d+\s+\w+\s+(.+)$')
+    pattern = re.compile('\w+\s+(\d+)\s+\d+\s+\d+\s+\d+\s+\w+\s+\w+\s+\w+\s+(.+)$')
     for app_info in app_infos:
         match = pattern.match(app_info.strip())
         if match:

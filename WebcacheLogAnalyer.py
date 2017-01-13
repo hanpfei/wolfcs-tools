@@ -39,7 +39,6 @@ def get_res_size(res_url):
     res = urllib.request.urlopen(res_url)
     data = res.read()
     data_length = len(data)
-    print("data length = " + str(data_length))
     return data_length
 
 
@@ -146,7 +145,6 @@ if __name__ == "__main__":
             static_res_request_distribute[sorted_url] = static_res_info
         else:
             static_res_request_distribute[sorted_url]["filenum"] = int(static_res_request_distribute[sorted_url]["filenum"]) + 1
-        print(sorted_url)
 
     for unique_url in sorted(static_res_request_distribute.keys()):
         print("%-100s %-10d%-10d" % (unique_url, static_res_request_distribute[unique_url]["filenum"],

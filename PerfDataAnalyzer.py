@@ -7,7 +7,7 @@ import sys
 
 def usage():
     basename = os.path.basename(sys.argv[0])
-    print str(basename) + " [test_data_file_path]"
+    print (str(basename) + " [test_data_file_path]")
     exit(1)
 
 
@@ -48,7 +48,33 @@ def compute_average_time(total_statistics):
     for url in urls:
         libnames = total_statistics[url].keys()
         for lib in libnames:
-            total_statistics[url][lib]["averageTime"] = total_statistics[url][lib]["totalTime"] / total_statistics[url][lib]["totalItemNum"]
+            if total_statistics[url][lib]:
+                total_statistics[url][lib]["averageTime"] = total_statistics[url][lib]["totalTime"] / total_statistics[url][lib]["totalItemNum"]
+
+def print_plain_statistics(total_statistics):
+    urls = total_statistics.keys()
+    urls = sorted(urls)
+
+    line70 = ""
+    for i in range(70):
+        line70 = line70 + "-"
+
+    line20 = ""
+    for i in range(20):
+        line20 = line20 + "-"
+
+    print("|%-70s|%-20s|%-20s|%-20s|" % ("Url", "Library", "Length", "averageTime"))
+    print("|%-70s|%-20s|%-20s|%-20s|" % (line70, line20, line20, line20))
+    for url in urls:
+        total_statistics[url]
+        libnames = total_statistics[url].keys()
+        libnames = sorted(libnames)
+        for libname in libnames:
+            if total_statistics[url][libname]:
+                # print(str(total_statistics[url][libname]))
+                print("|%-70s|%-20s|%-20d|%-20d|" % (url, libname, total_statistics[url][libname]["length"],
+                                                          total_statistics[url][libname]["averageTime"]))
+                # print(str(total_statistics[url]))
 
 
 def print_statistics(total_statistics):
@@ -56,14 +82,23 @@ def print_statistics(total_statistics):
     urls = sorted(urls)
     libnames = total_statistics[urls[0]].keys()
     libnames = sorted(libnames)
-    print ("%-50s%-20s%-20s%-20s%-20s%-20s" % ("Url", "data size(bytes)", libnames[0] + "(ms)",
+
+    print(str(libnames))
+    if len(libnames) == 2:
+        print("%-50s%-20s%-20s%-20s" % ("Url", "data size(bytes)", libnames[0] + "(ms)",
+                                                  libnames[1] + "(ms)"))
+    elif len(libnames) == 3:
+        print("%-50s%-20s%-20s%-20s%-20s" % ("Url", "data size(bytes)", libnames[0] + "(ms)",
+                                                  libnames[1] + "(ms)", libnames[2] + "(ms)"))
+    elif len(libnames) == 4:
+        print ("%-50s%-20s%-20s%-20s%-20s%-20s" % ("Url", "data size(bytes)", libnames[0] + "(ms)",
                                                        libnames[1] + "(ms)", libnames[2] + "(ms)",
                                                        libnames[3] + "(ms)"))
 
-    for url in urls:
-        libnames = total_statistics[url].keys()
-        libnames = sorted(libnames)
-        print ("%-50s%-20d%-20d%-20d%-20d%-20d" % (url, total_statistics[url][libnames[0]]["length"],
+        for url in urls:
+            libnames = total_statistics[url].keys()
+            libnames = sorted(libnames)
+            print ("%-50s%-20d%-20d%-20d%-20d%-20d" % (url, total_statistics[url][libnames[0]]["length"],
                                                    total_statistics[url][libnames[0]]["averageTime"],
                                                    total_statistics[url][libnames[1]]["averageTime"],
                                                    total_statistics[url][libnames[2]]["averageTime"],
@@ -92,4 +127,4 @@ if __name__ == "__main__":
             parse_statistics_item(statisticsJsonStrItem, total_statistics)
 
     compute_average_time(total_statistics)
-    print_statistics(total_statistics)
+    print_plain_statistics(total_statistics)

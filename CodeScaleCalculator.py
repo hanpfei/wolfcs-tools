@@ -2,13 +2,20 @@ import os;
 import sys;
 import string;
 
+def print_usage_and_exit():
+    print(sys.argv[0] + " [dir_path]")
+    exit(1)
+
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print_usage_and_exit()
+
     dirpath = sys.argv[1];
     total_line_num = 0;
     filelist = []
-    print "dirpath = " + dirpath;
+    print("dirpath = " + dirpath)
     filelist.append(dirpath);
-    print "filelist = " + str(filelist)
+    print("filelist = " + str(filelist))
     while len(filelist) > 0:
         file = filelist[0]
         filelist.remove(file)
@@ -45,5 +52,5 @@ if __name__ == "__main__":
                 fp = open(file, "r+")
                 linenum = len(fp.readlines())
                 total_line_num += linenum
-                print "file = " + str(file) + " : " + str(linenum)
-    print "total line num = " + str(total_line_num)
+                print ("file = " + str(file) + " : " + str(linenum))
+    print("total line num = " + str(total_line_num))

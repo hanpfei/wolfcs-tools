@@ -5,7 +5,7 @@ import shutil
 import sys
 
 def print_usage_and_exit():
-    print sys.argv[0] + " [chromium_src_root]" + "[out_dir]" + " [target_name]" + " [targetroot]"
+    print(sys.argv[0] + " [chromium_src_root]" + "[out_dir]" + " [target_name]" + " [targetroot]")
     exit(1)
 
 def copy_file(src_file_path, target_file_path):

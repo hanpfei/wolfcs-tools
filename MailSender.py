@@ -29,7 +29,7 @@ def print_usage_and_exit():
 def get_child_node(rootnode, child_field_name):
     nodes = rootnode.getiterator(child_field_name)
     node_value = nodes[0].text
-    print(child_field_name + " = " + node_value)
+    # print(child_field_name + " = " + node_value)
     return node_value
 
 def get_child_node_list(rootnode, child_field_name):
@@ -37,7 +37,7 @@ def get_child_node_list(rootnode, child_field_name):
     child_node_list = []
     for node in nodes:
         child_node_list.append(node.text)
-    print(str(child_node_list))
+    # print(str(child_node_list))
     return child_node_list
 
 def parse_config(config_file_path = None):
@@ -59,7 +59,6 @@ def parse_config(config_file_path = None):
 
         receivers = get_child_node_list(root.getiterator("receivers")[0], "email")
         ccs = get_child_node_list(root.getiterator("ccs")[0], "email")
-
 
 def construct_subject():
     date = datetime.datetime.now().strftime("%Y/%m/%d")
@@ -181,6 +180,13 @@ def generate_page(env, android_meta_data, android_datas, ios_meta_data, ios_data
     return template.render(android_meta_data = android_meta_data, android_datas = android_datas,
                            ios_meta_data = ios_meta_data, ios_datas = ios_datas)
 
+def query_data(start_date, end_date):
+    android_meta_data = None
+    android_datas = None
+    ios_meta_data = None
+    ios_datas = None
+
+    return android_meta_data, android_datas, ios_meta_data, ios_datas
 
 def write_page_to_file(page_content):
     page_file_path = "/home/hanpfei0306/report.html"
@@ -190,11 +196,9 @@ def write_page_to_file(page_content):
 if __name__ == "__main__":
     parse_config()
     query_start_date, query_end_date = get_query_range()
-
-    print(query_start_date)
-    print(query_end_date)
-
+    android_meta_data, android_datas, ios_meta_data, ios_datas = query_data(query_start_date, query_end_date)
     android_meta_data, android_datas, ios_meta_data, ios_datas = mock_data()
+
     env = Environment(loader=PackageLoader('MailSender', '.'))
     page_content = generate_page(env, android_meta_data, android_datas, ios_meta_data, ios_datas)
 

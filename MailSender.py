@@ -67,8 +67,10 @@ def construct_subject():
 
 def send_mail(page_content):
     msg = MIMEText(page_content, 'html', 'utf-8')
+
     subject = construct_subject()
-    msg['Subject'] = msg['Subject'] = Header(subject, 'utf-8')
+    msg['Subject'] = Header(subject, 'utf-8')
+    msg['From'] = u'Webcache <%s>' % sender
     msg['To'] = ",".join(receivers)
     msg['CC'] = ",".join(ccs)
 

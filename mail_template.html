@@ -1,0 +1,88 @@
+<html>
+<head>
+  <meta http-equiv="Content-Language" content="zh-cn">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Webcache缓存状况统计</title>
+</head>
+<style>
+  table,h1, h2, h3, h4, h5 {font-family: helvetica,"Hiragino Sans GB","Microsoft YaHei","微软雅黑","宋体";}
+  .title {padding-bottom: 10px; border-bottom: dashed 1px #03A9F4;}
+  .m-table{position: relative;width: 100%;border: 1px solid #e1e8ed; margin-top: 20px;}
+  .m-table thead tr {background-color: #eef2f5;border-bottom: 1px solid #e1e8ed;}
+  .m-table thead th, .m-table tbody td {padding: 5px; line-height: 20px; text-align: left; border-bottom: 1px solid #f3f3f3;}
+</style>
+<body>
+  <div style="margin:0;padding:0;text-align:center;margin:0 auto;width: 900px">
+  <h2 class="title">Android平台缓存命中情况统计</h2>
+  <h/>
+  <table cellpadding="0" cellspacing="0" border="0" style="text-align: left">
+  <tbody>
+    <tr><td>统计时间： {{android_meta_data.statTime}}</td></tr>
+  </tbody>
+  </table>
+  <table cellpadding="0" cellspacing="0" border="0" class="m-table">
+  <thead>
+  <tr>
+    <th>日期</th>
+    <th>请求文件总个数</th>
+    <th>命中文件个数</th>
+    <th>缓存文件命中率</th>
+    <th>命中文件总大小</th>
+    <th>资源包下载总大小</th>
+    <th>网络类型</th>
+  </tr>
+  </thead>
+  <tbody>
+  {% for android in android_datas %}
+  <tr>
+    <td>{{android.date}}</td>
+    <td>{{android.totalRequestFileNumber}}</td>
+    <td>{{android.cacheHitFileNumber}}</td>
+    <td>{{android.cacheHitFilePercent}}</td>
+    <td>{{android.cacheHitFileTotalSize}}</td>
+    <td>{{android.resrouceTotalSize}}</td>
+    <td>{{android.networkType}}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+  <br /><br /><br />
+
+  <h2 class="title">iOS平台缓存命中情况统计</h2>
+  <h/>
+  <table cellpadding="0" cellspacing="0" border="0" style="text-align: left">
+  <tbody>
+    <tr><td>统计时间： {{ios_meta_data.statTime}}</td></tr>
+  </tbody>
+  </table>
+  <table cellpadding="0" cellspacing="0" border="0" class="m-table">
+  <thead>
+  <tr>
+    <th>日期</th>
+    <th>请求文件总个数</th>
+    <th>命中文件个数</th>
+    <th>缓存文件命中率</th>
+    <th>命中文件总大小</th>
+    <th>资源包下载总大小)</th>
+    <th>网络类型</th>
+  </tr>
+  </thead>
+  <tbody>
+  {% for ios_data in ios_datas %}
+  <tr>
+    <td>{{ios_data.date}}</td>
+    <td>{{ios_data.totalRequestFileNumber}}</td>
+    <td>{{ios_data.cacheHitFileNumber}}</td>
+    <td>{{ios_data.cacheHitFilePercent}}</td>
+    <td>{{ios_data.cacheHitFileTotalSize}}</td>
+    <td>{{ios_data.resrouceTotalSize}}</td>
+    <td>{{ios_data.networkType}}</td>
+  </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+  <br /><br /><br />
+
+  </div>
+</body>
+</html>

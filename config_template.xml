@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mail_config>
+    <smtpserver></smtpserver>
+    <sender></sender>
+    <username></username>
+    <password></password>
+
+    <receivers>
+        <email></email>
+    </receivers>
+    <ccs>
+        <email></email>
+    </ccs>
+</mail_config>

@@ -65,6 +65,26 @@ def construct_subject():
     subject = SubjectFormatter % date
     return subject
 
+def send_mail_python3(msg):
+    smtp = smtplib.SMTP()
+    # smtp.set_debuglevel(1)
+
+    smtp.connect(smtpserver)
+    smtp.login(username, password)
+
+    smtp.send_message(msg, sender, receivers + ccs)
+
+    smtp.quit()
+
+def send_mail_python2(msg):
+    server = smtplib.SMTP()
+    server.connect(smtpserver)
+    server.login(username, password)
+
+    # server.set_debuglevel(1)
+    server.sendmail(sender, receivers + ccs, msg.as_string().encode('ascii'))
+    server.quit()
+
 def send_mail(page_content):
     msg = MIMEText(page_content, 'html', 'utf-8')
 
@@ -74,13 +94,10 @@ def send_mail(page_content):
     msg['To'] = ",".join(receivers)
     msg['CC'] = ",".join(ccs)
 
-    smtp = smtplib.SMTP()
-    smtp.connect(smtpserver)
-    smtp.login(username, password)
-
-    smtp.send_message(msg, sender, receivers + ccs)
-
-    smtp.quit()
+    if sys.version > '3':
+        send_mail_python3(msg)
+    else:
+        send_mail_python2(msg)
 
 def get_query_range():
     today = datetime.date.today()
@@ -88,6 +105,7 @@ def get_query_range():
     now = datetime.datetime.now()
     timestamp = time.mktime(now.timetuple())
     one_week_ago = today.fromtimestamp(timestamp - 7 * 24 * 60 * 60)
+    today = today.fromtimestamp(timestamp - 24 * 60 * 60)
     today_str = today.strftime("%Y-%m-%d")
     one_week_ago_str = one_week_ago.strftime("%Y-%m-%d")
 

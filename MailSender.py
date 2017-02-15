@@ -23,15 +23,18 @@ password = ''
 receivers = []
 ccs = []
 
+
 def print_usage_and_exit():
     print(sys.argv[0] + " [-c [config_file_path]]")
     exit(1)
+
 
 def get_child_node(rootnode, child_field_name):
     nodes = rootnode.getiterator(child_field_name)
     node_value = nodes[0].text
     # print(child_field_name + " = " + node_value)
     return node_value
+
 
 def get_child_node_list(rootnode, child_field_name):
     nodes = rootnode.getiterator(child_field_name)
@@ -40,6 +43,7 @@ def get_child_node_list(rootnode, child_field_name):
         child_node_list.append(node.text)
     # print(str(child_node_list))
     return child_node_list
+
 
 def parse_config(config_file_path = None):
     global smtpserver
@@ -63,10 +67,12 @@ def parse_config(config_file_path = None):
     receivers = get_child_node_list(root.getiterator("receivers")[0], "email")
     ccs = get_child_node_list(root.getiterator("ccs")[0], "email")
 
+
 def construct_subject():
     date = datetime.datetime.now().strftime("%Y/%m/%d")
     subject = SubjectFormatter % date
     return subject
+
 
 def send_mail_python3(msg):
     smtp = smtplib.SMTP()
@@ -79,6 +85,7 @@ def send_mail_python3(msg):
 
     smtp.quit()
 
+
 def send_mail_python2(msg):
     server = smtplib.SMTP()
     server.connect(smtpserver)
@@ -87,6 +94,7 @@ def send_mail_python2(msg):
     # server.set_debuglevel(1)
     server.sendmail(sender, receivers + ccs, msg.as_string().encode('ascii'))
     server.quit()
+
 
 def send_mail(page_content):
     msg = MIMEText(page_content, 'html', 'utf-8')
@@ -102,6 +110,7 @@ def send_mail(page_content):
     else:
         send_mail_python2(msg)
 
+
 def get_query_range():
     today = datetime.date.today()
 
@@ -113,6 +122,7 @@ def get_query_range():
     one_week_ago_str = one_week_ago.strftime("%Y-%m-%d")
 
     return one_week_ago_str, today_str
+
 
 def mock_data():
     android_meta_data = {}
@@ -144,6 +154,7 @@ def mock_data():
 
     return android_meta_data, android_datas, ios_meta_data, android_datas
 
+
 def format_integer(int_value):
     value_str = ""
     while int_value > 1000:
@@ -157,11 +168,13 @@ def format_integer(int_value):
 
     return value_str
 
+
 def format_double2percent(double_value):
     double_value = double_value * 100
     double_str = "%-.4f" % double_value
     double_str = double_str + "%"
     return double_str
+
 
 def format_integer2space(int_value):
     value_str = ""
@@ -179,6 +192,7 @@ def format_integer2space(int_value):
 
     return value_str
 
+
 def format_data(origin_datas):
     formatted_datas = []
     for data_item in origin_datas:
@@ -194,6 +208,7 @@ def format_data(origin_datas):
         formatted_datas.append(formatted_data_item)
     return formatted_datas;
 
+
 def generate_page(env, android_meta_data, android_datas, ios_meta_data, ios_datas):
     template = env.get_template('mail_template.html')
 
@@ -203,6 +218,7 @@ def generate_page(env, android_meta_data, android_datas, ios_meta_data, ios_data
     return template.render(android_meta_data = android_meta_data, android_datas = android_datas,
                            ios_meta_data = ios_meta_data, ios_datas = ios_datas)
 
+
 def query_data(start_date, end_date):
     android_meta_data = None
     android_datas = None
@@ -211,10 +227,12 @@ def query_data(start_date, end_date):
 
     return android_meta_data, android_datas, ios_meta_data, ios_datas
 
+
 def write_page_to_file(page_content):
     page_file_path = "/home/hanpfei0306/report.html"
     with open(page_file_path, "w") as page_file_handle:
         page_file_handle.write(page_content)
+
 
 def parse_parameter():
     config_file_path = None

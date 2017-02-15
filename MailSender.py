@@ -2,6 +2,7 @@
 #coding: utf-8
 
 import datetime
+import getopt
 import smtplib
 import sys
 import time
@@ -23,7 +24,7 @@ receivers = []
 ccs = []
 
 def print_usage_and_exit():
-    print(sys.argv[0] + " [dir_path]")
+    print(sys.argv[0] + " [-c [config_file_path]]")
     exit(1)
 
 def get_child_node(rootnode, child_field_name):
@@ -50,15 +51,17 @@ def parse_config(config_file_path = None):
 
     if config_file_path == None:
         config_file_path = "config.xml"
-        root = ElementTree.parse(config_file_path)
 
-        smtpserver = get_child_node(root, "smtpserver")
-        sender = get_child_node(root, "sender")
-        username = get_child_node(root, "username")
-        password = get_child_node(root, "password")
+    # print("Use config_file_path = " + str(config_file_path))
+    root = ElementTree.parse(config_file_path)
 
-        receivers = get_child_node_list(root.getiterator("receivers")[0], "email")
-        ccs = get_child_node_list(root.getiterator("ccs")[0], "email")
+    smtpserver = get_child_node(root, "smtpserver")
+    sender = get_child_node(root, "sender")
+    username = get_child_node(root, "username")
+    password = get_child_node(root, "password")
+
+    receivers = get_child_node_list(root.getiterator("receivers")[0], "email")
+    ccs = get_child_node_list(root.getiterator("ccs")[0], "email")
 
 def construct_subject():
     date = datetime.datetime.now().strftime("%Y/%m/%d")
@@ -213,8 +216,25 @@ def write_page_to_file(page_content):
     with open(page_file_path, "w") as page_file_handle:
         page_file_handle.write(page_content)
 
+def parse_parameter():
+    config_file_path = None
+    try:
+        opt_list, args = getopt.getopt(sys.argv[1:], "c:")
+        if len(opt_list) == 0:
+            print("Use default configuration file")
+        for opt, value in opt_list:
+            if opt == '-c':
+                config_file_path = value
+            else:
+                print_usage_and_exit()
+    except getopt.GetoptError as e:
+        print(str(e))
+    # print("config_file_path = " + str(config_file_path))
+    return config_file_path
+
 if __name__ == "__main__":
-    parse_config()
+    config_file_path = parse_parameter()
+    parse_config(config_file_path)
     query_start_date, query_end_date = get_query_range()
     android_meta_data, android_datas, ios_meta_data, ios_datas = query_data(query_start_date, query_end_date)
     android_meta_data, android_datas, ios_meta_data, ios_datas = mock_data()

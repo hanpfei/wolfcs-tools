@@ -5,10 +5,12 @@ import re
 import sys
 import urllib.request
 
+
 def usage():
     basename = os.path.basename(sys.argv[0])
     print(str(basename) + " [log_file_path]")
     exit(1)
+
 
 def get_file_type(url):
     res_type_extract_pattern = re.compile(r".+//.+/.+(\..+)\?.+$")
@@ -35,11 +37,35 @@ def get_file_type(url):
 
     return file_type
 
+
 def get_res_size(res_url):
     res = urllib.request.urlopen(res_url)
     data = res.read()
     data_length = len(data)
     return data_length
+
+
+def get_url_from_log_line(line):
+    pattern = re.compile(r".+Get resource (.+$)")
+    matcher = pattern.match(line)
+    url = None
+    if matcher:
+        url = matcher.group(1)
+    return url
+
+# Support the output of tshark, format: tshark -i enp4s0f2 -n -f 'tcp dst port 80'  -T fields -e http.host -e http.request.uri
+def get_url_from_tshark_line(line):
+    url = None
+    line = line.strip()
+    if line:
+        parts = line.split("\t")
+        host = parts[0].strip()
+        res_path = parts[1].strip()
+
+        url = "http://" + host + res_path
+        # print("url = " + str(url))
+
+    return url
 
 
 if __name__ == "__main__":
@@ -70,7 +96,7 @@ if __name__ == "__main__":
     css_static_res_num = 0
     js_static_res_num = 0
 
-    pattern = re.compile(r".+Get resource (.+$)")
+
     request_with_param_pattern = re.compile(r".+/.+\?.+$")
 
     css_static_url_pattern = re.compile(r".+(.+\.css$)")
@@ -83,9 +109,8 @@ if __name__ == "__main__":
     static_resource = []
     for line in all_log_lines:
         line = line.strip()
-        matcher = pattern.match(line)
-        if matcher:
-            url = matcher.group(1)
+        url = get_url_from_tshark_line(line)
+        if url:
             request_num += 1
             matcher = request_with_param_pattern.match(url)
             if matcher:
@@ -155,24 +180,25 @@ if __name__ == "__main__":
     print("%-25s%-25s%-25s%-25s" % ("request_num", "css_static_res_num", "js_static_res_num", "request_with_param_num"))
     print("%-25d%-25d%-25d%-25d" % (request_num, css_static_res_num, js_static_res_num, request_with_param_num))
 
+    sum = jpg_request_num + css_res_num + gif_res_num + html_res_num + ico_res_num + js_res_num + mp4_res_num \
+          + png_request_num + shtml_request_num + webp_request_num + others_request_num
+
     print("")
     print("--------------------------------------------------------------------------")
-    print("%-25s%-25d" % ("Jpeg file num: ", jpg_request_num))
-    print("%-25s%-25d" % ("css_res_num: ", css_res_num))
-    print("%-25s%-25d" % ("js_res_num: ", js_res_num))
-    print("%-25s%-25d" % ("gif_res_num: ", gif_res_num))
-    print("%-25s%-25d" % ("html_res_num: ", html_res_num))
-    print("%-25s%-25d" % ("ico_res_num: ", ico_res_num))
-    print("%-25s%-25d" % ("mp4_res_num: ", mp4_res_num))
-    print("%-25s%-25d" % ("png_request_num: ", png_request_num))
-    print("%-25s%-25d" % ("shtml_request_num: ", shtml_request_num))
-    print("%-25s%-25d" % ("webp_request_num: ", webp_request_num))
-    print("%-25s%-25d" % ("others_request_num: ", others_request_num))
+    print("%-25s%-25d%-.4f%%" % ("Jpeg file num: ", jpg_request_num, jpg_request_num / sum * 100))
+    print("%-25s%-25d%-.4f%%" % ("css_res_num: ", css_res_num, css_res_num / sum * 100))
+    print("%-25s%-25d%-.4f%%" % ("js_res_num: ", js_res_num, js_res_num / sum * 100))
+    print("%-25s%-25d%-.4f%%" % ("gif_res_num: ", gif_res_num, gif_res_num / sum * 100))
+    print("%-25s%-25d%-.4f%%" % ("html_res_num: ", html_res_num, html_res_num / sum * 100))
+    print("%-25s%-25d%-.4f%%" % ("ico_res_num: ", ico_res_num, ico_res_num / sum * 100))
+    print("%-25s%-25d%-.4f%%" % ("mp4_res_num: ", mp4_res_num, mp4_res_num / sum * 100))
+    print("%-25s%-25d%-.4f%%" % ("png_request_num: ", png_request_num, png_request_num / sum * 100))
+    print("%-25s%-25d%-.4f%%" % ("shtml_request_num: ", shtml_request_num, shtml_request_num / sum * 100))
+    print("%-25s%-25d%-.4f%%" % ("webp_request_num: ", webp_request_num, webp_request_num / sum * 100))
+    print("%-25s%-25d%-.4f%%" % ("others_request_num: ", others_request_num, others_request_num / sum * 100))
     print("--------------------------------------------------------------------------")
     print("")
 
-    sum = jpg_request_num + css_res_num + gif_res_num + html_res_num + ico_res_num + js_res_num + mp4_res_num \
-          + png_request_num + shtml_request_num + webp_request_num + others_request_num
     print("")
     print("--------------------------------------------------------------------------")
     print("sum = " + str(sum))

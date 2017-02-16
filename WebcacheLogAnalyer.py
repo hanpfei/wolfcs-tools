@@ -13,6 +13,7 @@ def usage():
 
 
 def get_file_type(url):
+    # print(url)
     res_type_extract_pattern = re.compile(r".+//.+/.+(\..+)\?.+$")
     res_type_extract_pattern2 = re.compile(r".+//.+/.+(\..+)$")
     res_type_extract_pattern3 = re.compile(r".+//.+/(.+)\?.+$")
@@ -32,16 +33,19 @@ def get_file_type(url):
     if not file_type.__contains__("."):
         matcher = webp_type_extract_pattern.match(url)
         if matcher:
-            # print(url)
             file_type = ".webp"
 
     return file_type
 
 
 def get_res_size(res_url):
-    res = urllib.request.urlopen(res_url)
-    data = res.read()
-    data_length = len(data)
+    data_length = 0
+    try:
+        res = urllib.request.urlopen(res_url)
+        data = res.read()
+        data_length = len(data)
+    except:
+        pass
     return data_length
 
 
@@ -52,6 +56,7 @@ def get_url_from_log_line(line):
     if matcher:
         url = matcher.group(1)
     return url
+
 
 # Support the output of tshark, format: tshark -i enp4s0f2 -n -f 'tcp dst port 80'  -T fields -e http.host -e http.request.uri
 def get_url_from_tshark_line(line):

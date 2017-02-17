@@ -62,13 +62,16 @@ def get_url_from_log_line(line):
 def get_url_from_tshark_line(line):
     url = None
     line = line.strip()
+    pattern = re.compile(r".+\t.+")
     if line:
-        parts = line.split("\t")
-        host = parts[0].strip()
-        res_path = parts[1].strip()
+        matcher = pattern.match(line)
+        if matcher:
+            parts = line.split("\t")
+            host = parts[0].strip()
+            res_path = parts[1].strip()
 
-        url = "http://" + host + res_path
-        # print("url = " + str(url))
+            url = "http://" + host + res_path
+            # print("url = " + str(url))
 
     return url
 
@@ -96,6 +99,7 @@ if __name__ == "__main__":
     webp_request_num = 0
     others_request_num = 0
 
+    request_with_param_urls = set()
     request_with_param_num = 0
 
     css_static_res_num = 0
@@ -114,12 +118,30 @@ if __name__ == "__main__":
     static_resource = []
     for line in all_log_lines:
         line = line.strip()
-        url = get_url_from_tshark_line(line)
+        url = get_url_from_log_line(line)
+        if not url:
+            url = get_url_from_tshark_line(line)
         if url:
+            if "loc.map.baidu.com" in url:
+                continue
+            elif "safe1.shouji.sogou.com" in url:
+                continue
+            elif "gw.alicdn.com" in url:
+                continue
+            elif url.endswith("uploadStartUpInfo.do"):
+                continue
+            elif url.endswith("mr.da.netease.com/receiver"):
+                continue
+            elif url.endswith("mam.netease.com/beacons/resources"):
+                continue
+            elif url.endswith(".html"):
+                continue
             request_num += 1
             matcher = request_with_param_pattern.match(url)
             if matcher:
                 request_with_param_num += 1
+            elif not url.endswith(".mp4"):
+                request_with_param_urls.add(url)
 
             matcher = css_static_url_pattern.match(url)
             if matcher:
@@ -214,6 +236,12 @@ if __name__ == "__main__":
     print("--------------------------------------------------------------------------")
     print("file types: ")
     for file_type in sorted(types):
-        pass
         print(file_type)
+    print("--------------------------------------------------------------------------")
+
+    print("")
+    print("--------------------------------------------------------------------------")
+    print("Resource without parameters: " + str(len(request_with_param_urls)))
+    for url in sorted(request_with_param_urls):
+        print(url)
     print("--------------------------------------------------------------------------")

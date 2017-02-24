@@ -22,7 +22,7 @@ fi
 
 cd /tmp
 
-url=http://archive.apache.org/dist/tomcat/tomcat-8/v8.5.2/bin/apache-tomcat-8.5.2.tar.gz
+url=http://archive.apache.org/dist/tomcat/tomcat-8/v8.0.32/bin/apache-tomcat-8.0.32.tar.gz
 filename=`basename $url`
 
 # echo "filename "
@@ -30,6 +30,8 @@ filename=`basename $url`
 
 if [ ! -f $filename ]; then 
   curl -O $url
+else
+  echo "$filename File exists"
 fi
 
 if [ $? -ne 0 ]; then
@@ -48,7 +50,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-tar xzvf apache-tomcat-8*tar.gz -C /opt/tomcat --strip-components=1
+tar xzf apache-tomcat-8*tar.gz -C /opt/tomcat --strip-components=1
 
 if [ $? -ne 0 ]; then
   echo "mkdir /opt/tomcat failed!!!"

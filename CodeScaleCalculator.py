@@ -25,8 +25,10 @@ if __name__ == "__main__":
                 sub_file_path = file + os.path.sep + subFile
                 filelist.append(sub_file_path)
         elif os.path.isfile(str(file)):
-            if (str(file).endswith("java") or str(file).endswith("cpp") or str(file).endswith(".h") or str(file).endswith(".c")
-                or str(file).endswith(".cc")):
+            if (str(file).endswith("java") or str(file).endswith("cpp")
+                or str(file).endswith(".h") or str(file).endswith(".c")
+                or str(file).endswith(".cc") or str(file).endswith(".scala")
+                or str(file).endswith(".go")):
                 if (file.find("R.java") != -1):
                     continue
                 if (file.find("BuildConfig.java") != -1):

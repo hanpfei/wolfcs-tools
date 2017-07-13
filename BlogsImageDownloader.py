@@ -93,7 +93,7 @@ def handle_dir(dirpath, root_path):
 
     for subfile in subfiles:
         subfile_path = os.path.join(dirpath, subfile)
-        if os.path.isdir(subfile_path):
+        if os.path.isdir(subfile_path) and subfile_path.__contains__("source"):
             new_dir_path.append(subfile_path)
         elif os.path.isfile(subfile_path) and subfile_path.endswith(".md"):
             # print("subfile_path = " + subfile_path)

@@ -14,7 +14,7 @@ def print_usage_and_exit():
 def handle_match(matcher, root_path):
     image_url = matcher.group(2)
     image_file_name = os.path.basename(image_url)
-    image_dir_path = os.path.join(root_path, "assets/images")
+    image_dir_path = os.path.join(root_path, "source/images")
     target_image_file_path = os.path.join(image_dir_path, image_file_name)
 
     new_image_url = "https://www.wolfcstech.com/images/" + image_file_name

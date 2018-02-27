@@ -39,10 +39,14 @@ if __name__ == "__main__":
                     continue
                 if (file.find("DShowBaseClasses") != -1):
                     continue
-                if (file.find("ortp") != -1):
-                    continue
+                # if (file.find("ortp") != -1):
+                #     continue
                 if (file.find("poco") != -1 or file.find("Poco") != -1) :
                     continue
+                # if (file.find("testProgs") != -1):
+                #     continue
+                # if (file.find("WindowsAudioInputDevice") != -1):
+                #     continue
                 if (file.find("test") != -1):
                     continue
                 if (file.find("tools") != -1):
@@ -51,8 +55,14 @@ if __name__ == "__main__":
                     continue
                 if (file.find("websockets") != -1):
                     continue
+                if (file.find("tcp_subr.c") != -1):
+                    continue
                 fp = open(file, "r+")
-                linenum = len(fp.readlines())
+                try:
+                    linenum = len(fp.readlines())
+                except Exception:
+                    pass
+
                 total_line_num += linenum
                 print ("file = " + str(file) + " : " + str(linenum))
     print("total line num = " + str(total_line_num))

@@ -4,7 +4,7 @@
 
 groupId=`id -g "tomcat"`
 
-if [ $groupId -ne 0 ]; then
+if [ $groupId != 0 ]; then
   echo "Group exists"
 else
   groupadd tomcat
@@ -12,7 +12,7 @@ fi
 
 userId=`id -u "tomcat"`
 
-if [ $userId -ne 0 ]; then
+if [ $userId != 0 ]; then
   echo "User exists"
 else
   useradd -s /bin/false -g tomcat -d /opt/tomcat tomcat

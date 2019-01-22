@@ -3,7 +3,6 @@
 import os
 import re
 import requests
-import shutil
 import sys
 
 def print_usage_and_exit():

@@ -1,12 +1,11 @@
-import os;
-import sys;
-import string;
+import os
+import sys
 
 def print_usage_and_exit():
     print(sys.argv[0] + " [dir_path]")
     exit(1)
 
-def calculateCodeScale(root_path, print_file_lines=False):
+def calculateCodeScale(root_path, index = 0, print_file_lines=False):
     total_line_num = 0
     filelist = []
     filelist.append(root_path);
@@ -24,32 +23,42 @@ def calculateCodeScale(root_path, print_file_lines=False):
                 or str(file).endswith(".cc") or str(file).endswith(".scala")
                 or str(file).endswith(".go")):
                 if (file.find("R.java") != -1):
+                    print("Skip R.java")
                     continue
                 if (file.find("BuildConfig.java") != -1):
+                    print("Skip BuildConfig.java")
                     continue
                 # if (file.find("nostra13") != -1):
                 #     continue
                 if (file.find("json") != -1):
+                    # print("Skip json")
                     continue
                 if (file.find("DShowBaseClasses") != -1):
+                    print("Skip DShowBaseClasses")
                     continue
                 # if (file.find("ortp") != -1):
                 #     continue
                 if (file.find("poco") != -1 or file.find("Poco") != -1):
+                    print("Skip Poco")
                     continue
                 # if (file.find("testProgs") != -1):
                 #     continue
                 # if (file.find("WindowsAudioInputDevice") != -1):
                 #     continue
                 if (file.find("test") != -1):
+                    # print("Skip test")
                     continue
-                if (file.find("tools") != -1):
-                    continue
+                # if (file.find("tools") != -1):
+                #     print("Skip tools")
+                #     continue
                 if (file.find("ftp") != -1):
+                    print("Skip ftp")
                     continue
                 if (file.find("websockets") != -1):
+                    print("Skip websockets")
                     continue
                 if (file.find("tcp_subr.c") != -1):
+                    print("Skip tcp_subr.c")
                     continue
                 fp = open(file, "r+")
                 try:
@@ -61,12 +70,13 @@ def calculateCodeScale(root_path, print_file_lines=False):
                 if print_file_lines:
                     print("file = " + str(file) + " : " + str(linenum))
     if total_line_num > 0:
-        print("|  %s   |  %s  |" %(os.path.basename(root_path), str(total_line_num)))
+        print("|  %d   |  %s   |  %s  |" %(index, os.path.basename(root_path), str(total_line_num)))
     return total_line_num > 0, total_line_num
 
 def countCodeScaleInSubDirs(root_dir_path):
-    print("| 模块名称        | 代码规模    |")
-    print("|----------------|-----------:|")
+    index = 1
+    print("| 序号        | 模块名称        | 代码规模    |")
+    print("|----------------|----------------|-----------:|")
     dir_num = 0
     all_code = 0;
     if os.path.isdir(str(root_dir_path)):
@@ -80,12 +90,14 @@ def countCodeScaleInSubDirs(root_dir_path):
             sub_dir_path = root_dir_path + os.path.sep + sub_dir
 
             if os.path.isdir(str(sub_dir_path)):
-                valid_module, codescale = calculateCodeScale(sub_dir_path)
+                valid_module, codescale = calculateCodeScale(sub_dir_path, index)
                 if valid_module:
                     dir_num = dir_num + 1
                     all_code = all_code + codescale
+                    index = index + 1
 
-    print("Directory numbers: %s, total code: %s" % (str(dir_num), str(all_code)))
+    print("|  %d   |  %s   |  %s  |" % (10000, "total", str(all_code)))
+    # print("Directory numbers: %s, total code: %s" % (str(dir_num), str(all_code)))
 
     return
 

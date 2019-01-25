@@ -2,9 +2,11 @@
 # -*- coding: UTF-8 -*-
 
 import getopt
+import platform
 import os
 import shutil
 import sys
+import time
 import zipfile
 
 
@@ -54,8 +56,10 @@ def copy_obj_files(link_root_path, output_dirpath):
 
 def compress(output_dir):
     output_dir_name = "KadaLink"
+    output_file_name = output_dir_name + "_" + platform.system() + "_" + time.strftime("%Y_%m_%d", time.localtime()) + ".zip"
+
     output_dirpath = output_dir + os.path.sep + output_dir_name
-    zipfilename = output_dir + os.path.sep + output_dir_name + ".zip"
+    zipfilename = output_dir + os.path.sep + output_file_name
 
     if (os.path.exists(zipfilename)):
         os.remove(zipfilename)

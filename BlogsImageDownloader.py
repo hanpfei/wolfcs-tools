@@ -5,6 +5,7 @@ import re
 import requests
 import sys
 
+
 def print_usage_and_exit():
     print(sys.argv[0] + " [dir_path]")
     exit(1)
@@ -13,10 +14,10 @@ def print_usage_and_exit():
 def handle_match(matcher, root_path):
     image_url = matcher.group(2)
     image_file_name = os.path.basename(image_url)
-    image_dir_path = os.path.join(root_path, "source/images")
+    image_dir_path = os.path.join(root_path, "images")
     target_image_file_path = os.path.join(image_dir_path, image_file_name)
 
-    new_image_url = "https://www.wolfcstech.com/images/" + image_file_name
+    new_image_url = "images/" + image_file_name
     image_comment = matcher.group(1)
 
     # print(image_url)
@@ -26,12 +27,20 @@ def handle_match(matcher, root_path):
 
     new_line = ""
     if not os.path.exists(target_image_file_path) or not os.path.isfile(target_image_file_path):
-        r = requests.get(image_url)
+        print("image_url", image_url)
+        if not image_url.startswith("http") and not image_url.startswith("https"):
+            return ""
+
+        user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36"
+        headers = { 'User-Agent': user_agent }
+
+        r = requests.get(image_url, headers=headers)
         with open(target_image_file_path, "wb") as image_file_handle:
             image_file_handle.write(r.content)
         new_line = "![" + image_comment + "](" + new_image_url + ")\n"
 
     return new_line
+
 
 def revise_line(line, root_path):
     new_line = line
@@ -53,6 +62,7 @@ def revise_line(line, root_path):
                 new_line = tmp_new_line
 
     return new_line
+
 
 def handle_file(file_path, root_path):
     if not os.path.isfile(file_path):
@@ -82,6 +92,7 @@ def handle_dir_with_walk(dirpath, root_path):
     for root, dirs, files in list_dirs:
         for fil in files:
             handle_file(os.path.join(root, fil))
+
 
 def handle_dir(dirpath, root_path):
     new_dir_path = []
@@ -114,3 +125,5 @@ if __name__ == "__main__":
         dirpaths.remove(cur_dir)
         if new_dirs:
             dirpaths += new_dirs
+
+    print("Done!!!")

@@ -11,13 +11,19 @@ def print_usage_and_exit():
     exit(1)
 
 
-def handle_match(matcher, root_path):
+def handle_match(matcher, root_path, file_path):
     image_url = matcher.group(2)
     image_file_name = os.path.basename(image_url)
-    image_dir_path = os.path.join(root_path, "images")
+
+    file_dir = os.path.abspath(os.path.join(file_path, ".."))
+    image_dir_path = os.path.join(file_dir, "images")
+    if not os.path.exists(image_dir_path):
+        image_dir_path = os.path.join(root_path, "source", "images")
+
     target_image_file_path = os.path.join(image_dir_path, image_file_name)
 
-    new_image_url = "images/" + image_file_name
+    relpath = os.path.relpath(target_image_file_path, file_dir)
+    new_image_url = relpath
     image_comment = matcher.group(1)
 
     # print(image_url)
@@ -26,8 +32,10 @@ def handle_match(matcher, root_path):
     # print(target_image_file_path)
 
     new_line = ""
-    if not os.path.exists(target_image_file_path) or not os.path.isfile(target_image_file_path):
-        print("image_url", image_url)
+    if image_url.find("www.wolfcstech.com") >= 0:
+        new_line = "![" + image_comment + "](" + new_image_url + ")\n"
+        return new_line
+    elif not os.path.exists(target_image_file_path) or not os.path.isfile(target_image_file_path):
         if not image_url.startswith("http") and not image_url.startswith("https"):
             return ""
 
@@ -42,14 +50,14 @@ def handle_match(matcher, root_path):
     return new_line
 
 
-def revise_line(line, root_path):
+def revise_line(line, root_path, file_path):
     new_line = line
     pattern = re.compile(r".*\!\[(.*)\]\((.+)\?.+\)")
     matcher = pattern.match(line)
 
     if matcher:
         # print(line)
-        tmp_new_line = handle_match(matcher, root_path)
+        tmp_new_line = handle_match(matcher, root_path, file_path)
         if tmp_new_line != "":
             new_line = tmp_new_line
     else:
@@ -57,7 +65,7 @@ def revise_line(line, root_path):
         matcher = pattern.match(line)
         if matcher:
             # print(line)
-            tmp_new_line = handle_match(matcher, root_path)
+            tmp_new_line = handle_match(matcher, root_path, file_path)
             if tmp_new_line != "":
                 new_line = tmp_new_line
 
@@ -76,7 +84,7 @@ def handle_file(file_path, root_path):
 
     lines = bak_file_handle.readlines()
     for line in lines:
-        new_line = revise_line(line, root_path)
+        new_line = revise_line(line, root_path, file_path)
         new_file_handle.write(new_line)
 
     bak_file_handle.close()

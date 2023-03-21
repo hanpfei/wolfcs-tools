@@ -1,9 +1,87 @@
+from genericpath import isfile
 import os
 import sys
+
+ignore_dir_list = [
+    "build",
+    "doc",
+    ".gradle",
+    ".git",
+    "gradle",
+    ".idea",
+    "captures",
+    "git-batch",
+    "gitlab-monitor",
+    "nei-monitor",
+    "fuzzer"
+]
+
+
+valid_file_exts_list = [
+    ".java",
+    ".cpp",
+    ".h",
+    ".c",
+    ".cc",
+    ".scala",
+    ".go"
+]
+
+
+ignore_file_list = [
+    "R.java",
+    "BuildConfig.java",
+    "nostra13",
+    "json",
+    "DShowBaseClasses",
+    "poco",
+    "Poco",
+    "ortp",
+    "testProgs",
+    "WindowsAudioInputDevice",
+    "test",
+    "tests",
+    "tools",
+    "ftp",
+    "websockets",
+    "tcp_subr.c",
+]
 
 def print_usage_and_exit():
     print(sys.argv[0] + " [dir_path]")
     exit(1)
+
+
+def isValidFileType(file):
+    valid = False
+    for ext in valid_file_exts_list:
+        if str(file).endswith(ext):
+            valid = True
+            break
+    return valid
+
+
+def isValidFile(file):
+    valid = True
+    for invalid in ignore_file_list:
+        if (file.find(invalid) != -1):
+            # print("Skip " + invalid + ": " + file)
+            valid = False
+            break
+    return valid
+
+
+def calculateFileCodeScale(file):
+    linenum = 0
+    if (isValidFileType(file)):
+        if (isValidFile(file)):
+            fp = open(file, "r+")
+            try:
+                linenum = len(fp.readlines())
+            except Exception:
+                pass
+    return linenum
+
 
 def calculateCodeScale(root_path, index = 0, print_file_lines=False):
     total_line_num = 0
@@ -18,54 +96,7 @@ def calculateCodeScale(root_path, index = 0, print_file_lines=False):
                 sub_file_path = file + os.path.sep + subFile
                 filelist.append(sub_file_path)
         elif os.path.isfile(str(file)):
-            if (str(file).endswith("java") or str(file).endswith("cpp")
-                or str(file).endswith(".h") or str(file).endswith(".c")
-                or str(file).endswith(".cc") or str(file).endswith(".scala")
-                or str(file).endswith(".go")):
-                if (file.find("R.java") != -1):
-                    print("Skip R.java")
-                    continue
-                if (file.find("BuildConfig.java") != -1):
-                    print("Skip BuildConfig.java")
-                    continue
-                # if (file.find("nostra13") != -1):
-                #     continue
-                if (file.find("json") != -1):
-                    # print("Skip json")
-                    continue
-                if (file.find("DShowBaseClasses") != -1):
-                    print("Skip DShowBaseClasses")
-                    continue
-                # if (file.find("ortp") != -1):
-                #     continue
-                if (file.find("poco") != -1 or file.find("Poco") != -1):
-                    print("Skip Poco")
-                    continue
-                # if (file.find("testProgs") != -1):
-                #     continue
-                # if (file.find("WindowsAudioInputDevice") != -1):
-                #     continue
-                if (file.find("test") != -1):
-                    # print("Skip test")
-                    continue
-                # if (file.find("tools") != -1):
-                #     print("Skip tools")
-                #     continue
-                if (file.find("ftp") != -1):
-                    print("Skip ftp")
-                    continue
-                if (file.find("websockets") != -1):
-                    print("Skip websockets")
-                    continue
-                if (file.find("tcp_subr.c") != -1):
-                    print("Skip tcp_subr.c")
-                    continue
-                fp = open(file, "r+")
-                try:
-                    linenum = len(fp.readlines())
-                except Exception:
-                    pass
-
+                linenum = calculateFileCodeScale(file)
                 total_line_num += linenum
                 if print_file_lines:
                     print("file = " + str(file) + " : " + str(linenum))
@@ -80,22 +111,25 @@ def countCodeScaleInSubDirs(root_dir_path):
     dir_num = 0
     all_code = 0;
     if os.path.isdir(str(root_dir_path)):
-        dirs = os.listdir(str(root_dir_path))
-        dirs.sort()
-        for sub_dir in dirs:
-            if sub_dir == "build" or sub_dir == "doc" or sub_dir == ".gradle" or sub_dir == ".git"\
-                    or sub_dir == "gradle" or sub_dir == ".idea" or sub_dir == "captures" \
-                    or sub_dir == "git-batch" or sub_dir == "gitlab-monitor" or sub_dir == "nei-monitor":
+        dir_or_files = os.listdir(str(root_dir_path))
+        dir_or_files.sort()
+        root_files_line_num = 0
+        for sub_dir_or_file in dir_or_files:
+            if ignore_dir_list.count(sub_dir_or_file) > 0:
                 continue
-            sub_dir_path = root_dir_path + os.path.sep + sub_dir
+            sub_file_or_dir_path = root_dir_path + os.path.sep + sub_dir_or_file
 
-            if os.path.isdir(str(sub_dir_path)):
-                valid_module, codescale = calculateCodeScale(sub_dir_path, index)
+            if os.path.isdir(str(sub_file_or_dir_path)):
+                valid_module, codescale = calculateCodeScale(sub_file_or_dir_path, index)
                 if valid_module:
                     dir_num = dir_num + 1
                     all_code = all_code + codescale
                     index = index + 1
-
+            elif os.path.isfile(str(sub_file_or_dir_path)):
+                root_files_line_num += calculateFileCodeScale(sub_file_or_dir_path)
+    if root_files_line_num > 0:
+        print("|  %d   |  %s   |  %s  |" % (index, os.path.basename(root_dir_path), str(root_files_line_num)))
+        all_code = all_code + root_files_line_num
     print("|  %d   |  %s   |  %s  |" % (10000, "total", str(all_code)))
     # print("Directory numbers: %s, total code: %s" % (str(dir_num), str(all_code)))
 

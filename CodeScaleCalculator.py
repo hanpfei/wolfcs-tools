@@ -13,7 +13,10 @@ ignore_dir_list = [
     "git-batch",
     "gitlab-monitor",
     "nei-monitor",
-    "fuzzer"
+    "fuzzer",
+    "examples",
+    "benchmarks",
+    "fuzz"
 ]
 
 
@@ -24,7 +27,9 @@ valid_file_exts_list = [
     ".c",
     ".cc",
     ".scala",
-    ".go"
+    ".go",
+    ".aidl",
+    ".hal"
 ]
 
 
@@ -46,6 +51,7 @@ ignore_file_list = [
     "websockets",
     "tcp_subr.c",
 ]
+
 
 def print_usage_and_exit():
     print(sys.argv[0] + " [dir_path]")
@@ -92,9 +98,12 @@ def calculateCodeScale(root_path, index = 0, print_file_lines=False):
         filelist.remove(file)
         if os.path.isdir(str(file)):
             files = os.listdir(str(file))
-            for subFile in files:
-                sub_file_path = file + os.path.sep + subFile
-                filelist.append(sub_file_path)
+            files = list(map(lambda curfile: file + os.path.sep + curfile, files))
+            filelist = filelist + files
+
+            # for subFile in files:
+            #     sub_file_path = file + os.path.sep + subFile
+            #     filelist.append(sub_file_path)
         elif os.path.isfile(str(file)):
                 linenum = calculateFileCodeScale(file)
                 total_line_num += linenum
@@ -103,6 +112,7 @@ def calculateCodeScale(root_path, index = 0, print_file_lines=False):
     if total_line_num > 0:
         print("|  %d   |  %s   |  %s  |" %(index, os.path.basename(root_path), str(total_line_num)))
     return total_line_num > 0, total_line_num
+
 
 def countCodeScaleInSubDirs(root_dir_path):
     index = 1
@@ -130,7 +140,7 @@ def countCodeScaleInSubDirs(root_dir_path):
     if root_files_line_num > 0:
         print("|  %d   |  %s   |  %s  |" % (index, os.path.basename(root_dir_path), str(root_files_line_num)))
         all_code = all_code + root_files_line_num
-    print("|  %d   |  %s   |  %s  |" % (10000, "total", str(all_code)))
+    print("|  10000   |  Total   |  %s  |" % (str(all_code)))
     # print("Directory numbers: %s, total code: %s" % (str(dir_num), str(all_code)))
 
     return

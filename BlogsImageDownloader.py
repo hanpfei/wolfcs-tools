@@ -17,6 +17,9 @@ def handle_match(matcher, root_path, file_path):
 
     file_dir = os.path.abspath(os.path.join(file_path, ".."))
     image_dir_path = os.path.join(file_dir, "images")
+
+    if not os.path.exists(image_dir_path) and not file_dir.endswith("_posts"):
+        os.mkdir(image_dir_path)
     if not os.path.exists(image_dir_path):
         image_dir_path = os.path.join(root_path, "source", "images")
 

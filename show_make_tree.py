@@ -7,7 +7,7 @@ from os.path import exists
 __FILE    = "\u001b[32mFile   : " # green
 __INHERIT = "\u001b[33mInherit: " # yellow
 __DUPLICATE = "\u001b[33mDuplica: " # yellow
-__SEARCH  = "\u001b[31mSearch : " # read
+__SEARCH  = "\u001b[31mFound  : " # read
 __INCLUDE = "\u001b[36mInclude: " # cyan
 __NONE    = "\u001b[0m"           # reset
 
@@ -31,30 +31,27 @@ def find(android_root, mk_file, level, type, search_target, mk_files):
     file = android_root + os.path.sep + mk_file
     if exists(file):
         if file in mk_files:
-            indent(level, __DUPLICATE, file)
+            indent(level, __DUPLICATE, mk_file)
             return
         else:
             mk_files.add(file)
-        indent(level, type, file)
+        indent(level, type, mk_file)
         with open(file, "r") as f:
             for index, line in enumerate(f.readlines()):
+                line = line.strip()
                 if line.startswith("$(call inherit-product"):
                     line = line.replace("$(SRC_TARGET_DIR)", "build/target")
                     line = line.split(",")[1]
-                    line = line.strip()
                     line = line[:-1]
+                    line = line.strip()
                     
                     find(android_root, line, level+1, __INHERIT, search_target, mk_files)
-                elif line.startswith("include"):
+                if line.startswith("include"):
                     line = line.split(" ")[1]
                     line = line.strip()
-                    
                     find(android_root, line, level+1, __INCLUDE, search_target, mk_files)
-                elif search_target in line:
-                    indent(level+1, __SEARCH, line.strip(), index + 1)
-                else:
-                    if line.endswith(".mk)"):
-                        print(line, " in file ", file)
+                if search_target in line:
+                    indent(level+1, __SEARCH, line, index + 1)
 
 
 if len(sys.argv) >= 4:

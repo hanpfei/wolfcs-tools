@@ -12,8 +12,14 @@ __INCLUDE = "\u001b[36mInclude: " # cyan
 __NONE    = "\u001b[0m"           # reset
 
 
+__NO_ERROR    = "\u001b[32m" # green
+__WARNING = "\u001b[33m" # yellow
+__FATAL  = "\u001b[31m" # read
+__INFO = "\u001b[36m" # cyan
+
+
 def print_usage():
-    print(__SEARCH, "Usage: %s $android_root $root_mk_file $target" % sys.argv[0])
+    print(__FATAL, "Usage: %s $android_root $root_mk_file $target" % sys.argv[0])
     print(__NONE)
 
 

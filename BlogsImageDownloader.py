@@ -4,11 +4,82 @@ import os
 import re
 import requests
 import sys
-
+from PIL import Image
 
 def print_usage_and_exit():
     print(sys.argv[0] + " [dir_path]")
     exit(1)
+
+
+format_to_suffix = {
+    "JPEG": ["jpg"],
+    "PNG": ["png"],
+    "WEBP": ["webp"],
+}
+
+
+def download_image_file(image_url, target_image_file_path):
+    if not image_url.startswith("http") and not image_url.startswith("https"):
+        print("Unsupported url " + image_url)
+        return False
+
+    user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36"
+    headers = {'User-Agent': user_agent}
+
+    r = requests.get(image_url, headers=headers)
+    with open(target_image_file_path, "wb") as image_file_handle:
+        image_file_handle.write(r.content)
+
+    try:
+        im = Image.open(target_image_file_path, 'r')
+        str(im.format)
+        im.close()
+    except Image.UnidentifiedImageError as e:
+        os.remove(target_image_file_path)
+        print("Download image file %s failed!!!" % target_image_file_path)
+
+    if os.path.exists(target_image_file_path):
+        return True
+    else:
+        return False
+
+
+def convert_image_format_from_webp_to_png(target_image_file_path):
+    bak_image_file_path = target_image_file_path + "_bak"
+    os.rename(target_image_file_path, bak_image_file_path)
+    input_image = Image.open(bak_image_file_path)
+    if input_image.mode != "RGB":
+        input_image = input_image.convert("RGB")
+    input_image.save(target_image_file_path, "PNG")
+
+    os.remove(bak_image_file_path)
+
+
+def check_image_file_ext_and_format(image_file_path):
+    match = False
+    ext_name = ""
+    image_format = ""
+    try:
+        global format_to_suffix
+        im = Image.open(image_file_path, 'r')
+        image_format = str(im.format)
+        im.close()
+        ext_name = image_file_path[image_file_path.rfind(".") + 1:]
+        ext_name = ext_name.upper()
+
+        if image_format in format_to_suffix.keys():
+            suffixes = format_to_suffix[image_format]
+            for suffix in suffixes:
+                if ext_name.upper() == suffix.upper():
+                    match = True
+                    break
+        else:
+            print("Unsupported image file %s, format %s" % (image_file_path, image_format))
+    except Image.UnidentifiedImageError as e:
+        os.remove(image_file_path)
+        print("Invalid image file format: %s!!!" % image_file_path)
+
+    return match, ext_name, image_format
 
 
 def handle_match(matcher, root_path, file_path):
@@ -37,18 +108,18 @@ def handle_match(matcher, root_path, file_path):
     new_line = ""
     if image_url.find("www.wolfcstech.com") >= 0:
         new_line = "![" + image_comment + "](" + new_image_url + ")\n"
-        return new_line
     elif not os.path.exists(target_image_file_path) or not os.path.isfile(target_image_file_path):
-        if not image_url.startswith("http") and not image_url.startswith("https"):
+        if not download_image_file(image_url, target_image_file_path):
             return ""
-
-        user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36"
-        headers = { 'User-Agent': user_agent }
-
-        r = requests.get(image_url, headers=headers)
-        with open(target_image_file_path, "wb") as image_file_handle:
-            image_file_handle.write(r.content)
         new_line = "![" + image_comment + "](" + new_image_url + ")\n"
+
+    if not os.path.exists(target_image_file_path):
+        print("Downlaod file %s failed" % target_image_file_path)
+
+    (match, ext_name, image_format) = check_image_file_ext_and_format(target_image_file_path)
+    if not match:
+        if ext_name == "PNG" and image_format == "WEBP":
+            convert_image_format_from_webp_to_png(target_image_file_path)
 
     return new_line
 
